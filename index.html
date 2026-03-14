@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intentify — Message Intent Analyzer</title>
+  <meta name="description" content="Analyze the real intent behind any message. Detect tone, hidden signals, red flags, message type, and response strategy instantly." />
+  <meta name="keywords" content="message intent analyzer, text analyzer, dating message analyzer, email tone checker, red flag detector, message type analyzer, intentify" />
+  <meta name="author" content="Intentify" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#7a5cff" />
+  <meta property="og:title" content="Intentify — Message Intent Analyzer" />
+  <meta property="og:description" content="Decode the real meaning behind any message with tone, intent, red flags, message type, and response strategy." />
+  <meta property="og:type" content="website" />
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:title" content="Intentify — Message Intent Analyzer" />
+  <meta property="twitter:description" content="Analyze tone, intent, red flags, and message type instantly." />
+  <style>
+    :root {
+      --bg: #070b16;
+      --bg-2: #0c1224;
+      --bg-soft: rgba(16, 23, 45, 0.82);
+      --card: rgba(20, 28, 54, 0.72);
+      --card-strong: rgba(24, 34, 66, 0.92);
+      --line: rgba(165, 180, 255, 0.14);
+      --line-strong: rgba(165, 180, 255, 0.24);
+      --text: #f5f7ff;
+      --muted: #a9b4df;
+      --muted-2: #c8d0f0;
+      --accent: #7a5cff;
+      --accent-2: #9f8cff;
+      --accent-3: #5eead4;
+      --good: #35c978;
+      --warn: #f6b657;
+      --bad: #ff6f7d;
+      --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+      --shadow-soft: 0 20px 40px rgba(0, 0, 0, 0.22);
+      --radius: 24px;
+      --radius-sm: 18px;
+      --max: 1120px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.55;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(122,92,255,.18), transparent 24%),
+        radial-gradient(circle at 86% 14%, rgba(94,234,212,.10), transparent 20%),
+        radial-gradient(circle at 50% 100%, rgba(159,140,255,.12), transparent 28%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(circle at center, black 30%, transparent 88%);
+      opacity: .35;
+    }
+
+    .container {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 84px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      box-shadow: var(--shadow-soft);
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .topbar-note {
+      color: var(--muted);
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .hero {
+      padding: 30px;
+      margin-bottom: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -20% auto auto 58%;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(122,92,255,.30), transparent 65%);
+      filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+      gap: 28px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted-2);
+      background: rgba(255,255,255,.04);
+      font-size: 13px;
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(38px, 7vw, 64px);
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+      max-width: 760px;
+    }
+
+    .accent-text {
+      background: linear-gradient(90deg, #ffffff 0%, #cfc5ff 52%, #95fff0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .preview-card {
+      padding: 22px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .preview-card .eyebrow {
+      color: var(--accent-3);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .preview-message {
+      background: rgba(6, 10, 21, .54);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--muted-2);
+      padding: 16px;
+      border-radius: 18px;
+      margin-bottom: 16px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .preview-pill {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .preview-pill small {
+      display: block;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .preview-pill strong {
+      font-size: 15px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .analyzer {
+      padding: 26px;
+      margin-bottom: 28px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 620px;
+    }
+
+    .mini-note {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 190px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(9, 14, 28, 0.92), rgba(15, 22, 43, 0.82));
+      color: var(--text);
+      border-radius: 20px;
+      padding: 20px 20px 54px;
+      font: inherit;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    textarea:focus {
+      border-color: rgba(122,92,255,.75);
+      box-shadow: 0 0 0 4px rgba(122,92,255,.14);
+    }
+
+    .textarea-note {
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+      align-items: center;
+    }
+
+    button, .button-link {
+      border: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+      box-shadow: 0 14px 28px rgba(122,92,255,.24);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover, .button-link:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 30px rgba(122,92,255,.28);
+    }
+
+    button:active, .button-link:active { transform: translateY(0); }
+
+    .ghost {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      color: var(--muted-2);
+      box-shadow: none;
+    }
+
+    .ghost:hover { box-shadow: none; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .results {
+      display: none;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .results.show { display: grid; }
+
+    .metric, .verdict, .examples, .info, .faq, .how-it-works {
+      padding: 22px;
+    }
+
+    .metric {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025));
+    }
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 96px;
+      height: 96px;
+      background: radial-gradient(circle, rgba(122,92,255,.20), transparent 65%);
+      pointer-events: none;
+    }
+
+    .metric h3, .verdict h3, .examples h2, .info h2, .faq h2, .how-it-works h2 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .metric .value {
+      font-size: 22px;
+      font-weight: 800;
+      margin-top: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .metric .meta {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+      max-width: 28ch;
+    }
+
+    .tone-chip, .intent-chip, .clarity-chip, .flag-chip, .confidence-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      color: var(--muted-2);
+    }
+
+    .score-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow: hidden;
+      margin-top: 14px;
+      border: 1px solid rgba(255,255,255,.05);
+    }
+
+    .score-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--bad), var(--warn), var(--good));
+      border-radius: 999px;
+      transition: width .35s ease;
+    }
+
+    .verdict {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .verdict-main p {
+      margin: 8px 0 0;
+      color: var(--muted-2);
+      font-size: 17px;
+      max-width: 68ch;
+    }
+
+    .verdict-box {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .verdict-box h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .verdict-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .sections {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .step {
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .step strong {
+      display: inline-flex;
+      width: 30px;
+      height: 30px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(122,92,255,.18);
+      color: #dfd8ff;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .step h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .examples ul, .faq ul {
+      padding-left: 18px;
+      margin: 12px 0 0;
+      color: var(--muted);
+    }
+
+    .examples li + li { margin-top: 8px; }
+
+    .info p, .faq p {
+      color: var(--muted);
+      margin: 10px 0 0;
+    }
+
+    .faq-item + .faq-item {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 30px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .verdict {
+        grid-template-columns: 1fr;
+      }
+
+      .results {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .sections,
+      .how-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .container { width: min(var(--max), calc(100% - 20px)); }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .topbar-note { text-align: left; }
+      .hero, .analyzer, .metric, .verdict, .examples, .info, .faq, .how-it-works { padding: 18px; }
+      .hero-stats, .results { grid-template-columns: 1fr; }
+      textarea { min-height: 170px; }
+      .section-head { flex-direction: column; }
+      .mini-note { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">I</div>
+        <div>Intentify</div>
+      </div>
+      <div class="topbar-note">Premium MVP • Instant browser-based analysis • No signup</div>
+    </div>
+
+    <section class="hero card">
+      <div class="hero-grid">
+        <div>
+          <div class="badge-row">
+            <div class="badge">Message intent analysis</div>
+            <div class="badge">Tone + red flags + clarity</div>
+            <div class="badge">Fast, clean, no login</div>
+          </div>
+
+          <h1>Decode the <span class="accent-text">real meaning</span> behind any message.</h1>
+          <p class="subtitle">
+            Intentify helps you read between the lines. Paste a text, DM, or email and get a clear breakdown of tone, likely intent, clarity, warning signs, and an overall verdict.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#analyzer" class="button-link">Try the analyzer</a>
+            <button id="heroExampleBtn" class="ghost" type="button">See example result</button>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat">
+              <strong>7 signals</strong>
+              <span>Tone, intent, clarity, flags, score, confidence, verdict</span>
+            </div>
+            <div class="stat">
+              <strong>1 screen</strong>
+              <span>No friction, no account, no unnecessary steps</span>
+            </div>
+            <div class="stat">
+              <strong>Instant output</strong>
+              <span>Built for quick decisions and easy interpretation</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="preview-card">
+          <div class="eyebrow">Sample insight</div>
+          <div class="preview-message">“Yeah maybe, I’ll see if I’m free.”</div>
+          <div class="preview-grid">
+            <div class="preview-pill"><small>Tone</small><strong>Uncertain</strong></div>
+            <div class="preview-pill"><small>Intent</small><strong>Low commitment</strong></div>
+            <div class="preview-pill"><small>Clarity</small><strong>Low</strong></div>
+            <div class="preview-pill"><small>Signal</small><strong>Weak yes</strong></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="analyzer" class="card analyzer">
+      <div class="section-head">
+        <div>
+          <h2>Analyze your message</h2>
+          <p>Paste the exact text you received or want to interpret. The cleaner the input, the stronger the signal.</p>
+        </div>
+        <div class="mini-note">Designed for DMs, dating texts, chat messages, and emails</div>
+      </div>
+
+      <label for="messageInput">Paste your message</label>
+      <div class="input-wrap">
+        <textarea id="messageInput" placeholder="Example: Yeah maybe, I’ll see if I’m free."></textarea>
+        <div class="textarea-note">Tip: paste the full sentence for a more accurate directional read.</div>
+      </div>
+
+      <div class="controls">
+        <button id="analyzeBtn">Analyze Message</button>
+        <button id="exampleBtn" class="ghost" type="button">Use Example</button>
+        <button id="clearBtn" class="ghost" type="button">Clear</button>
+        <button id="copyBtn" class="ghost" type="button">Copy Result</button>
+        <button id="downloadBtn" class="ghost" type="button">Download Result Card</button>
+        <span class="hint">Fast premium MVP. Runs directly in the browser.</span>
+      </div>
+
+      <section id="results" class="results" aria-live="polite">
+        <article class="card metric">
+          <h3>Tone</h3>
+          <div id="toneValue" class="value">—</div>
+          <div id="toneChip" class="tone-chip">Signal class</div>
+          <div class="meta">How the message feels emotionally.</div>
+        </article>
+
+        <article class="card metric">
+          <h3>Intent</h3>
+          <div id="intentValue" class="value">—</div>
+          <div id="intentChip" class="intent-chip">Likely direction</div>
+          <div class="meta">What the sender likely wants or avoids.</div>
+        </article>
+
+        <article class="card metric">
+          <h3>Clarity</h3>
+          <div id="clarityValue" class="value">—</div>
+          <div id="clarityChip" class="clarity-chip">Readability</div>
+          <div class="meta">How direct or ambiguous the message is.</div>
+        </article>
+
+        <article class="card metric">
+          <h3>Red Flags</h3>
+          <div id="redFlagValue" class="value">—</div>
+          <div id="redFlagChip" class="flag-chip">Risk signal</div>
+          <div class="meta">Possible warning signs in the wording.</div>
+        </article>
+
+        <article class="card metric">
+          <h3>Interest Score</h3>
+          <div id="scoreValue" class="value">—</div>
+          <div class="score-bar"><div id="scoreFill" class="score-fill"></div></div>
+          <div id="scoreLabel" class="meta">—</div>
+        </article>
+
+        <article class="card metric">
+          <h3>Confidence</h3>
+          <div id="confidenceValue" class="value">—</div>
+          <div id="confidenceChip" class="confidence-chip">Signal confidence</div>
+          <div class="meta">How strong the signal looks based on the text.</div>
+        </article>
+
+        <article class="card verdict">
+          <div class="verdict-main">
+            <h3>Verdict</h3>
+            <p id="verdictValue">—</p>
+          </div>
+          <div class="verdict-box">
+            <h4>Quick read</h4>
+            <p id="quickReadValue">Paste a message to get a concise interpretation here.</p>
+          </div>
+          <div class="verdict-box">
+            <h4>What this probably means</h4>
+            <p id="meaningValue">A short plain-English interpretation will appear here.</p>
+          </div>
+          <div class="verdict-box">
+            <h4>Best response strategy</h4>
+            <p id="responseStrategyValue">A suggested response approach will appear here.</p>
+          </div>
+          <div class="verdict-box">
+            <h4>Message type</h4>
+            <p id="messageTypeValue">The communication pattern will appear here.</p>
+          </div>
+        </article>
+      </section>
+    </section>
+
+    <section class="card how-it-works">
+      <h2>How it works</h2>
+      <div class="how-grid">
+        <div class="step">
+          <strong>01</strong>
+          <h3>Paste the message</h3>
+          <p>Use the exact text so the wording, hesitation, and emotional signal remain intact.</p>
+        </div>
+        <div class="step">
+          <strong>02</strong>
+          <h3>Read the breakdown</h3>
+          <p>Intentify scores tone, intent, clarity, and possible red flags in one view.</p>
+        </div>
+        <div class="step">
+          <strong>03</strong>
+          <h3>Use the verdict</h3>
+          <p>Get a plain-English summary that helps you decide what the message really means.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sections">
+      <article class="card examples">
+        <h2>Example messages</h2>
+        <ul>
+          <li>Yeah maybe, I’ll see if I’m free.</li>
+          <li>That sounds fun, I’m free after 7 if you want.</li>
+          <li>I’m really busy right now.</li>
+          <li>We should hang out sometime.</li>
+          <li>Sure. Do whatever you want.</li>
+        </ul>
+      </article>
+
+      <article class="card info">
+        <h2>What this tool does</h2>
+        <p>
+          Intentify analyzes the wording of a message and estimates tone, likely intent, clarity, and possible red flags.
+          It is designed for texts, emails, chats, dating messages, and ambiguous replies that need a cleaner read.
+        </p>
+      </article>
+
+      <article class="card faq">
+        <h2>FAQ</h2>
+
+        <div class="faq-item">
+          <h3>How does it work?</h3>
+          <p>It uses message-pattern rules and signal detection directly in the browser.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can it analyze any message?</h3>
+          <p>Yes. You can paste short texts, DMs, dating messages, or emails.</p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Is it perfect?</h3>
+          <p>No. This version is a premium-feeling MVP designed to give fast, useful directional insight.</p>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      Built for fast interpretation of texts, DMs, emails, and dating messages.
+    </footer>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Intentify",
+    "applicationCategory": "CommunicationApplication",
+    "operatingSystem": "Any",
+    "description": "Analyze the real intent behind any message with tone, intent, clarity, red flags, message type, and response strategy.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <script>
+      Intentify — AI Message Intent Analyzer
+    </footer>
+  </main>
+
+  <script>
+    const messageInput = document.getElementById('messageInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const exampleBtn = document.getElementById('exampleBtn');
+    const heroExampleBtn = document.getElementById('heroExampleBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const results = document.getElementById('results');
+
+    const toneValue = document.getElementById('toneValue');
+    const intentValue = document.getElementById('intentValue');
+    const clarityValue = document.getElementById('clarityValue');
+    const redFlagValue = document.getElementById('redFlagValue');
+    const scoreValue = document.getElementById('scoreValue');
+    const scoreLabel = document.getElementById('scoreLabel');
+    const scoreFill = document.getElementById('scoreFill');
+    const confidenceValue = document.getElementById('confidenceValue');
+    const verdictValue = document.getElementById('verdictValue');
+    const quickReadValue = document.getElementById('quickReadValue');
+    const meaningValue = document.getElementById('meaningValue');
+    const responseStrategyValue = document.getElementById('responseStrategyValue');
+    const messageTypeValue = document.getElementById('messageTypeValue');
+    const toneChip = document.getElementById('toneChip');
+    const intentChip = document.getElementById('intentChip');
+    const clarityChip = document.getElementById('clarityChip');
+    const redFlagChip = document.getElementById('redFlagChip');
+    const confidenceChip = document.getElementById('confidenceChip');
+
+    const exampleMessage = "Yeah maybe, I’ll see if I’m free.";
+
+    const sets = {
+      warm: ['sounds fun', 'i’d love', 'love to', 'glad', 'happy', 'great', 'excited', 'looking forward', 'free after', 'let’s', 'lets', 'sure!', 'definitely', 'would love', 'that works', 'perfect', 'yes, let', 'yes let'],
+      cold: ['k', 'ok.', 'fine', 'whatever', 'do whatever', 'sure.', 'if you want', 'up to you', 'as you want', 'your choice'],
+      uncertain: ['maybe', 'i’ll see', 'ill see', 'not sure', 'perhaps', 'might', 'we’ll see', 'well see', 'probably', 'possibly', 'kind of', 'a bit hard to say'],
+      avoidant: ['busy', 'another time', 'sometime', 'later', 'can’t', 'cant', 'not now', 'we should sometime', 'some other time', 'this week is crazy', 'maybe another day'],
+      defensive: ['i already said', 'as i said', 'obviously', 'calm down', 'relax', 'why are you', 'stop', 'you are overthinking', 'you’re overthinking', 'youre overthinking'],
+      flirty: ['😉', '😊', '😘', 'handsome', 'cute', 'miss you', 'wish you were here', 'haha you', 'hehe', 'you looked good', 'you look good'],
+      aggressive: ['shut up', 'leave me alone', 'don’t text me', 'dont text me', 'annoying', 'stupid', 'ridiculous', 'go away'],
+      pressure: ['now', 'asap', 'immediately', 'right now', 'need you to', 'you should', 'must', 'answer me', 'reply now'],
+      testing: ['if you really', 'do you even', 'prove', 'show me', 'let’s see if', 'lets see if', 'if you cared', 'if you were serious'],
+      positiveCommitment: ['yes', 'i can', 'i am free', 'free after', 'let’s do it', 'lets do it', 'sounds good', 'see you', 'works for me', 'i’d like to', 'id like to', 'let me know a time'],
+      politeRejection: ['maybe another time', 'i don’t think', 'i dont think', 'not really', 'can’t make it', 'cant make it', 'sorry i can’t', 'sorry i cant', 'i dont want to', 'i need to pass'],
+      evasive: ['sometime', 'later', 'maybe', 'we should', 'i’ll let you know', 'ill let you know', 'i’ll see', 'ill see', 'not sure yet', 'we can see'],
+      manipulation: ['if you cared', 'if you really cared', 'after all i did', 'you always', 'you never', 'guess i mean nothing', 'fine forget it then'],
+      detailSignals: ['after 7', 'tomorrow', 'tonight', 'this weekend', 'at 8', 'on friday', 'on sunday', 'here is why', 'because'],
+      delaySignals: ['busy right now', 'later maybe', 'not now', 'some other time', 'i’ll let you know', 'ill let you know'],
+      apologySofteners: ['sorry', 'unfortunately', 'wish i could', 'i would but'],
+      enthusiasm: ['absolutely', 'definitely', 'for sure', 'can’t wait', 'cant wait', 'sounds amazing', 'would love to'],
+      weakeners: ['i guess', 'maybe', 'if possible', 'if i can', 'we’ll see', 'well see']
+    };
+
+    function includesAny(text, phrases) {
+      return phrases.some(phrase => text.includes(phrase));
+    }
+
+    function countMatches(text, phrases) {
+      return phrases.reduce((count, phrase) => count + (text.includes(phrase) ? 1 : 0), 0);
+    }
+
+    function clamp(num, min, max) {
+      return Math.max(min, Math.min(max, num));
+    }
+
+    function getScoreLabel(score) {
+      if (score <= 25) return 'Very low interest';
+      if (score <= 50) return 'Low interest';
+      if (score <= 75) return 'Moderate interest';
+      return 'Strong interest';
+    }
+
+    function analyzeMessage(message) {
+      const text = message.trim().toLowerCase();
+      const length = text.length;
+
+      let score = 50;
+      let signalStrength = 0;
+
+      const positiveCount = countMatches(text, sets.warm) + countMatches(text, sets.positiveCommitment) + countMatches(text, sets.flirty) + countMatches(text, sets.enthusiasm);
+      const uncertainCount = countMatches(text, sets.uncertain) + countMatches(text, sets.weakeners);
+      const avoidantCount = countMatches(text, sets.avoidant) + countMatches(text, sets.delaySignals);
+      const coldCount = countMatches(text, sets.cold);
+      const defensiveCount = countMatches(text, sets.defensive);
+      const aggressiveCount = countMatches(text, sets.aggressive);
+      const pressureCount = countMatches(text, sets.pressure);
+      const testingCount = countMatches(text, sets.testing);
+      const politeRejectCount = countMatches(text, sets.politeRejection) + countMatches(text, sets.apologySofteners);
+      const evasiveCount = countMatches(text, sets.evasive);
+      const manipulationCount = countMatches(text, sets.manipulation);
+      const detailCount = countMatches(text, sets.detailSignals);
+
+      const hasQuestion = text.includes('?');
+      const hasExclamation = text.includes('!');
+      const hasHumor = text.includes('haha') || text.includes('lol') || text.includes('hehe');
+      const hasBut = text.includes(' but ') || text.startsWith('but ') || text.includes(', but ');
+      const hasSpecificPlan = detailCount > 0 || /(after|at|on|tomorrow|tonight|weekend|friday|saturday|sunday|monday)/.test(text);
+      const isVeryShort = length < 16;
+
+      score += positiveCount * 9;
+      score += detailCount * 5;
+      score -= uncertainCount * 8;
+      score -= avoidantCount * 10;
+      score -= coldCount * 11;
+      score -= defensiveCount * 12;
+      score -= aggressiveCount * 22;
+      score -= politeRejectCount * 10;
+      score -= evasiveCount * 7;
+      score -= manipulationCount * 16;
+      score -= pressureCount * 8;
+
+      if (hasQuestion) score += 3;
+      if (hasExclamation) score += 4;
+      if (hasHumor) score += 4;
+      if (hasSpecificPlan) score += 7;
+      if (isVeryShort && positiveCount === 0) score -= 6;
+      if (hasBut && positiveCount > 0) score -= 6;
+
+      score = clamp(score, 0, 100);
+
+      let tone = 'Neutral';
+      if (aggressiveCount > 0) tone = 'Aggressive';
+      else if (defensiveCount > 0) tone = 'Defensive';
+      else if (includesAny(text, sets.flirty)) tone = 'Flirty';
+      else if (coldCount > 0) tone = 'Cold';
+      else if (uncertainCount > 0 || evasiveCount > 0) tone = 'Uncertain';
+      else if (positiveCount > 0) tone = 'Friendly';
+      else if (text.includes('sure') && (text.includes('...') || text.includes('whatever'))) tone = 'Passive-aggressive';
+
+      let intent = 'Curiosity';
+      if (manipulationCount > 0 || testingCount > 0) intent = 'Emotional testing';
+      else if (pressureCount > 0) intent = 'Pressure';
+      else if (politeRejectCount > 0 && !hasSpecificPlan) intent = 'Polite rejection';
+      else if (avoidantCount > 0 && (uncertainCount > 0 || evasiveCount > 0)) intent = 'Avoidance';
+      else if ((positiveCount > 0 && (uncertainCount > 0 || hasBut)) || (hasSpecificPlan && uncertainCount > 0)) intent = 'Mixed signals';
+      else if (uncertainCount > 0 || evasiveCount > 0) intent = 'Low commitment';
+      else if (positiveCount > 1 || includesAny(text, sets.positiveCommitment) || hasSpecificPlan) intent = 'Genuine interest';
+
+      let clarity = 'Medium';
+      if (isVeryShort || uncertainCount > 0 || evasiveCount > 0 || avoidantCount > 0) clarity = 'Low';
+      if (hasSpecificPlan || includesAny(text, sets.positiveCommitment) || politeRejectCount > 0 || aggressiveCount > 0) clarity = 'High';
+      if ((positiveCount > 0 && uncertainCount > 0) || hasBut) clarity = 'Low';
+
+      let redFlags = 'No major red flags';
+      if (manipulationCount > 0) redFlags = 'Possible manipulation';
+      else if (aggressiveCount > 0 || defensiveCount > 0) redFlags = 'Emotional distance';
+      else if (intent === 'Mixed signals') redFlags = 'Mixed signals';
+      else if (avoidantCount > 0 && uncertainCount > 0) redFlags = 'Lack of commitment';
+      else if (evasiveCount > 0 || uncertainCount > 0) redFlags = 'Evasive wording';
+
+      signalStrength += positiveCount + uncertainCount + avoidantCount + coldCount + defensiveCount + aggressiveCount + pressureCount + politeRejectCount + evasiveCount + manipulationCount + testingCount + detailCount;
+      if (length > 35) signalStrength += 1;
+      if (length > 80) signalStrength += 1;
+      if (hasSpecificPlan) signalStrength += 1;
+
+      let confidence = 'Low';
+      if (signalStrength >= 3) confidence = 'Medium';
+      if (signalStrength >= 5) confidence = 'High';
+
+      let messageType = 'Neutral message';
+
+      let verdict = 'This message is fairly neutral and does not show a strong positive or negative signal.';
+      let meaning = 'The sender is not revealing a very strong emotional or practical direction.';
+      let responseStrategy = 'Reply normally and avoid over-interpreting it.';
+
+      if (intent === 'Genuine interest') {
+        verdict = 'This message is warm, engaged, and reasonably clear. The sender appears genuinely interested and open to continuing.';
+        meaning = hasSpecificPlan
+          ? 'This is more than politeness. The sender is pairing interest with a concrete opening or next step.'
+          : 'The sender is giving a real positive signal, even if the message is not extremely emotional.';
+        responseStrategy = 'Match the energy, keep it easy, and move the conversation forward with a specific next step.';
+      } else if (intent === 'Low commitment') {
+        verdict = 'This message suggests hesitation rather than strong enthusiasm. The sender is keeping the door open, but avoiding a clear commitment.';
+        meaning = 'They probably do not want to fully reject you, but they also do not want to commit right now.';
+        responseStrategy = 'Do not chase. Keep your reply short and let them invest more before you push further.';
+      } else if (intent === 'Avoidance') {
+        verdict = 'The wording points to avoidance. The sender may not want to fully reject, but is not showing real intent to engage right now.';
+        meaning = 'This usually means the person wants distance, delay, or less pressure without saying a direct no.';
+        responseStrategy = 'Step back and give space. Avoid trying to force clarity in the same message.';
+      } else if (intent === 'Polite rejection') {
+        verdict = 'This looks like a soft rejection. The wording stays polite, but the overall signal leans negative.';
+        meaning = 'The sender likely wants to decline while keeping the interaction civil and low-friction.';
+        responseStrategy = 'Accept the signal gracefully. Do not try to negotiate or reinterpret it into a yes.';
+      } else if (intent === 'Pressure') {
+        verdict = 'The message creates urgency or pressure. The sender may be trying to control timing or push a response.';
+        meaning = 'The focus is less on connection and more on getting you to react quickly or comply.';
+        responseStrategy = 'Slow the pace, keep boundaries, and answer only what you actually want to answer.';
+      } else if (intent === 'Emotional testing') {
+        verdict = 'The message may be testing your reaction or using emotional pressure rather than speaking directly.';
+        meaning = 'Instead of stating a need clearly, the sender may be probing your response, guilt, or reassurance level.';
+        responseStrategy = 'Stay calm, do not over-defend yourself, and respond to the substance rather than the emotional bait.';
+      } else if (intent === 'Mixed signals') {
+        verdict = 'The message contains mixed signals. There may be some interest, but the wording is inconsistent or hesitant.';
+        meaning = 'Part of the message leans positive, but another part weakens it through vagueness, delay, or contradiction.';
+        responseStrategy = 'Keep your reply balanced. Acknowledge the positive part, but avoid investing heavily until the signal becomes clearer.';
+      } else if (tone === 'Aggressive') {
+        verdict = 'The message is openly negative and confrontational. The tone is clear and the emotional signal is strong.';
+        meaning = 'The sender is communicating frustration or hostility directly rather than subtly.';
+        responseStrategy = 'Do not mirror the aggression. Keep your response minimal, calm, and boundary-based.';
+      }
+
+      const toneGroup = tone === 'Friendly' || tone === 'Flirty'
+        ? 'Positive tone'
+        : tone === 'Neutral'
+        ? 'Balanced tone'
+        : tone === 'Uncertain'
+        ? 'Hesitant tone'
+        : tone === 'Cold' || tone === 'Passive-aggressive'
+        ? 'Detached tone'
+        : 'High-friction tone';
+
+      const intentGroup = intent === 'Genuine interest'
+        ? 'Open and engaged'
+        : intent === 'Curiosity'
+        ? 'Mild openness'
+        : intent === 'Low commitment'
+        ? 'Non-committal'
+        : intent === 'Avoidance'
+        ? 'Pulling away'
+        : intent === 'Polite rejection'
+        ? 'Soft no'
+        : intent === 'Mixed signals'
+        ? 'Conflicted signal'
+        : 'Pressure or testing';
+
+      const redFlagLevel = redFlags === 'No major red flags'
+        ? 'Low risk'
+        : redFlags === 'Mixed signals' || redFlags === 'Evasive wording'
+        ? 'Moderate risk'
+        : 'High risk';
+
+      const quickRead = intent === 'Genuine interest'
+        ? 'Likely a real yes.'
+        : intent === 'Low commitment'
+        ? 'Not a clear yes.'
+        : intent === 'Avoidance'
+        ? 'Likely dodging commitment.'
+        : intent === 'Polite rejection'
+        ? 'Probably a soft no.'
+        : intent === 'Mixed signals'
+        ? 'Interest is unclear.'
+        : tone === 'Aggressive'
+        ? 'Strong negative signal.'
+        : 'Signal is present, but not fully clear.';
+
+            if (intent === 'Genuine interest') messageType = 'Real Interest Signal';
+      else if (intent === 'Low commitment') messageType = 'Soft Maybe';
+      else if (intent === 'Avoidance') messageType = 'Avoidance / Delay';
+      else if (intent === 'Polite rejection') messageType = 'Soft No';
+      else if (intent === 'Mixed signals') messageType = 'Mixed Signals';
+      else if (intent === 'Emotional testing') messageType = 'Emotional Test';
+      else if (intent === 'Pressure') messageType = 'Pressure Message';
+      else if (tone === 'Aggressive') messageType = 'Direct Negative';
+
+      return {
+        tone,
+        intent,
+        clarity,
+        redFlags,
+        score,
+        scoreLabel: getScoreLabel(score),
+        confidence,
+        verdict,
+        quickRead,
+        meaning,
+        responseStrategy,
+        messageType,
+        toneGroup,
+        intentGroup,
+        redFlagLevel
+      };
+    }
+
+    function renderResult(result) {
+      toneValue.textContent = result.tone;
+      intentValue.textContent = result.intent;
+      clarityValue.textContent = result.clarity;
+      redFlagValue.textContent = result.redFlags;
+      scoreValue.textContent = `${result.score} / 100`;
+      scoreLabel.textContent = result.scoreLabel;
+      scoreFill.style.width = `${result.score}%`;
+      confidenceValue.textContent = result.confidence;
+      verdictValue.textContent = result.verdict;
+      quickReadValue.textContent = result.quickRead;
+      meaningValue.textContent = result.meaning;
+      responseStrategyValue.textContent = result.responseStrategy;
+      messageTypeValue.textContent = result.messageType;
+
+      toneChip.textContent = result.toneGroup;
+      intentChip.textContent = result.intentGroup;
+      clarityChip.textContent = result.clarity === 'High' ? 'Direct signal' : result.clarity === 'Medium' ? 'Some ambiguity' : 'Ambiguous wording';
+      redFlagChip.textContent = result.redFlagLevel;
+      confidenceChip.textContent = result.confidence === 'High' ? 'Strong signal' : result.confidence === 'Medium' ? 'Usable signal' : 'Weak signal';
+
+      results.classList.add('show');
+      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function getCurrentResultText() {
+      if (!results.classList.contains('show')) return '';
+      return [
+        'Intentify — Message Intent Analyzer',
+        `Tone: ${toneValue.textContent}`,
+        `Intent: ${intentValue.textContent}`,
+        `Clarity: ${clarityValue.textContent}`,
+        `Red Flags: ${redFlagValue.textContent}`,
+        `Interest Score: ${scoreValue.textContent}`,
+        `Confidence: ${confidenceValue.textContent}`,
+        `Message Type: ${messageTypeValue.textContent}`,
+        '',
+        `Quick Read: ${quickReadValue.textContent}`,
+        `What this probably means: ${meaningValue.textContent}`,
+        `Best response strategy: ${responseStrategyValue.textContent}`,
+        '',
+        `Verdict: ${verdictValue.textContent}`
+      ].join('
+');
+    }
+
+    async function copyResult() {
+      const text = getCurrentResultText();
+      if (!text) {
+        alert('Analyze a message first.');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => { copyBtn.textContent = 'Copy Result'; }, 1200);
+      } catch {
+        alert('Copy failed. Please try again.');
+      }
+    }
+
+    function downloadResultCard() {
+      const text = getCurrentResultText();
+      if (!text) {
+        alert('Analyze a message first.');
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const width = 1200;
+      const height = 900;
+      canvas.width = width;
+      canvas.height = height;
+
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#0b1020');
+      gradient.addColorStop(0.55, '#161c33');
+      gradient.addColorStop(1, '#102537');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      roundRect(ctx, 60, 60, width - 120, height - 120, 28, true, false);
+
+      ctx.fillStyle = '#f5f7ff';
+      ctx.font = 'bold 42px Inter, Arial, sans-serif';
+      ctx.fillText('Intentify Result', 100, 140);
+
+      ctx.fillStyle = '#a9b4df';
+      ctx.font = '24px Inter, Arial, sans-serif';
+      ctx.fillText('Message Intent Analyzer', 100, 180);
+
+      const lines = [
+        `Tone: ${toneValue.textContent}`,
+        `Intent: ${intentValue.textContent}`,
+        `Clarity: ${clarityValue.textContent}`,
+        `Red Flags: ${redFlagValue.textContent}`,
+        `Interest Score: ${scoreValue.textContent}`,
+        `Confidence: ${confidenceValue.textContent}`,
+        `Message Type: ${messageTypeValue.textContent}`,
+        '',
+        `Quick Read: ${quickReadValue.textContent}`,
+        `What this probably means: ${meaningValue.textContent}`,
+        `Best response strategy: ${responseStrategyValue.textContent}`
+      ];
+
+      let y = 250;
+      ctx.font = '28px Inter, Arial, sans-serif';
+      ctx.fillStyle = '#eef2ff';
+      for (const line of lines) {
+        const wrapped = wrapText(ctx, line, 1000);
+        for (const part of wrapped) {
+          ctx.fillText(part, 100, y);
+          y += 42;
+        }
+        y += 10;
+      }
+
+      ctx.fillStyle = '#9f8cff';
+      ctx.font = 'bold 24px Inter, Arial, sans-serif';
+      ctx.fillText('intentify', 100, height - 90);
+
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = 'intentify-result.png';
+      link.click();
+    }
+
+    function wrapText(ctx, text, maxWidth) {
+      if (!text) return [''];
+      const words = text.split(' ');
+      const lines = [];
+      let current = words[0] || '';
+      for (let i = 1; i < words.length; i++) {
+        const test = `${current} ${words[i]}`;
+        if (ctx.measureText(test).width <= maxWidth) current = test;
+        else {
+          lines.push(current);
+          current = words[i];
+        }
+      }
+      lines.push(current);
+      return lines;
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      if (typeof radius === 'number') {
+        radius = { tl: radius, tr: radius, br: radius, bl: radius };
+      }
+      ctx.beginPath();
+      ctx.moveTo(x + radius.tl, y);
+      ctx.lineTo(x + width - radius.tr, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+      ctx.lineTo(x + width, y + height - radius.br);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+      ctx.lineTo(x + radius.bl, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+      ctx.lineTo(x, y + radius.tl);
+      ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    analyzeBtn.addEventListener('click', () => {
+      const message = messageInput.value.trim();
+      if (!message) {
+        alert('Paste a message first.');
+        return;
+      }
+      const result = analyzeMessage(message);
+      renderResult(result);
+    });
+
+    exampleBtn.addEventListener('click', () => {
+      messageInput.value = exampleMessage;
+      const result = analyzeMessage(exampleMessage);
+      renderResult(result);
+    });
+
+    heroExampleBtn.addEventListener('click', () => {
+      messageInput.value = exampleMessage;
+      const result = analyzeMessage(exampleMessage);
+      renderResult(result);
+      document.getElementById('analyzer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    clearBtn.addEventListener('click', () => {
+      messageInput.value = '';
+      results.classList.remove('show');
+    });
+
+    copyBtn.addEventListener('click', copyResult);
+    downloadBtn.addEventListener('click', downloadResultCard);
+
+    messageInput.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        analyzeBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
